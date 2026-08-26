@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>关于 · LiveCopy 直播文案工作室</title>
+  <meta name="description" content="LiveCopy 的设计思路：为什么重新写而不是翻译、为什么用真实像素校验、如何把文化适配显性化。Qingyu Peng 的作品集项目。" />
+  <meta property="og:title" content="关于 · LiveCopy 直播文案工作室" />
+  <meta property="og:description" content="一个跨市场直播文案工具的完整设计过程与思考。" />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23fe2c55'/%3E%3Ctext x='16' y='22' font-size='16' text-anchor='middle' fill='white'%3E直%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+KR:wght@400;700&family=Noto+Sans+SC:wght@400;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-page="about">
+  <header class="site-nav">
+    <div class="nav-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-pill">LIVE</span>
+        <span class="brand-name">LiveCopy <em>直播文案工作室</em></span>
+      </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="navMenu" aria-label="打开菜单">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav-menu" id="navMenu">
+        <a href="index.html" data-nav="home">首页</a>
+        <a href="tool.html" data-nav="tool">工具</a>
+        <a href="about.html" data-nav="about">关于</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- 页头 -->
+    <header class="case-header">
+      <p class="eyebrow">Case Study</p>
+      <h1>关于 LiveCopy</h1>
+      <p class="subtitle">一个跨市场直播文案工具：把「翻译 → 上线 → 翻车 → 回滚」的循环，换成「生成 → 像素校验 → 直接可发」。</p>
+    </header>
+
+    <!-- 项目信息 -->
+    <dl class="case-meta">
+      <div>
+        <dt>项目类型</dt>
+        <dd>个人作品集项目</dd>
+      </div>
+      <div>
+        <dt>角色</dt>
+        <dd>产品设计 · 前端实现</dd>
+      </div>
+      <div>
+        <dt>技术栈</dt>
+        <dd>HTML / CSS / JS<br>零依赖 · 零构建</dd>
+      </div>
+      <div>
+        <dt>设计系统</dt>
+        <dd>暖纸色自定义变量<br>Nunito + Noto Sans 家族</dd>
+      </div>
+    </dl>
+
+    <!-- 01 问题 -->
+    <section class="case-section">
+      <div class="case-num">01</div>
+      <h2>问题：直译会翻车，而且翻在用户面前</h2>
+      <p class="case-lead">直播电商出海时，同一句英文促销文案直译到不同市场，会遇到三类典型问题——每一类都直接影响转化，而且往往要上线之后才被发现。</p>
+      <ul class="case-list">
+        <li>
+          <strong>按钮被撑破</strong>
+          <span>西语文本比英文长 20–30%，按钮文案直接被截成省略号，CTA 等于白做。</span>
+        </li>
+        <li>
+          <strong>语气不合市场</strong>
+          <span>日语命令句显得粗鲁，促销语境要用です/ます；逐词翻译保住语义，保不住礼貌。</span>
+        </li>
+        <li>
+          <strong>字幕挡住商品卡</strong>
+          <span>字幕行数过多会盖住下方的购物入口，用户看得到热闹，点不到商品。</span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- 02 设计思路 -->
+    <section class="case-section">
+      <div class="case-num">02</div>
+      <h2>设计思路：三个判断</h2>
+      <div class="case-thoughts">
+        <div class="case-thought">
+          <div class="thought-tag">判断一</div>
+          <h3>重新写，而不是翻译</h3>
+          <p>每个市场由「意图 + 语气」驱动重新生成文案。机翻只保证语义正确，不保证口语节奏和文化安全；直播文案是话术，不是文本。</p>
+        </div>
+        <div class="case-thought">
+          <div class="thought-tag">判断二</div>
+          <h3>校验真实像素，而不是字符数</h3>
+          <p>用离屏 DOM 实测按钮宽度与字幕行数，和线上渲染用同一套字体字号。字符数猜不出「155 还是 156 会溢出」，像素量得出。</p>
+        </div>
+        <div class="case-thought">
+          <div class="thought-tag">判断三</div>
+          <h3>把文化经验显性化</h3>
+          <p>资深运营脑子里的「这个市场不能这么说话」，写进界面成为每个市场旁边的一句提示，让经验不依赖某个人在场。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 方案展示 -->
+    <section class="case-section">
+      <div class="case-num">03</div>
+      <h2>方案：工具长这样</h2>
+      <p class="case-lead">左边是焦点市场的实时预览，右边是像素 QA 结论与文化提示；下方五张市场卡并排对比，红黄绿一眼可辨。</p>
+
+      <div class="case-figures">
+        <figure class="case-figure">
+          <div class="case-figure-phone" aria-hidden="true">
+            <div class="phone">
+              <div class="phone-screen lang-zh">
+                <div class="video-scene"></div>
+                <div class="status-bar">
+                  <span>9:41</span>
+                  <span class="live-pill">直播</span>
+                  <span>📶</span>
+                </div>
+                <div class="comment-stream">
+                  <div class="live-comment">来了来了</div>
+                  <div class="live-comment">这波可以冲</div>
+                  <div class="live-comment">主播再转转款</div>
+                </div>
+                <div class="side-actions">
+                  <span class="avatar-btn">
+                    <span class="avatar">青</span>
+                    <span class="follow">+</span>
+                  </span>
+                  <span class="icon-btn">
+                    <svg viewBox="0 0 24 24" class="icon heart">
+                      <path d="M12 21s-6.2-4.35-9.33-8.22C.5 10.2.7 6.9 3.2 5.15 5.3 3.7 8 4.1 9.6 6.05L12 8.7l2.4-2.65C16 4.1 18.7 3.7 20.8 5.15c2.5 1.75 2.7 5.05.53 7.63C18.2 16.65 12 21 12 21z"/>
+                    </svg>
+                    <span class="count">12.8万</span>
+                  </span>
+                  <span class="icon-btn">
+                    <svg viewBox="0 0 24 24" class="icon bookmark">
+                      <path d="M6.5 3.5h11A1.5 1.5 0 0 1 19 5v16l-7-3.4L5 21V5A1.5 1.5 0 0 1 6.5 3.5z"/>
+                    </svg>
+                    <span class="count">9612</span>
+                  </span>
+                  <span class="disc"></span>
+                </div>
+                <div class="video-caption">
+                  <div class="username">@qingyu.live</div>
+                  <p class="caption-text">直播间现在有今晚限定五折，错过今晚就没了。</p>
+                  <div class="music-row">♪ 原创音乐 · qingyu</div>
+                  <div class="action-row">
+                    <span class="cta">进直播抢五折</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <figcaption>焦点预览：切到中文市场时，弹幕、按钮、直播标识全部本地化，文案按「热闹促销」语气重新生成。</figcaption>
+        </figure>
+
+        <figure class="case-figure">
+          <div class="case-figure-qa">
+            <div class="caption-top">
+              <div class="meta-title">LATAM / Español</div>
+              <div class="char-count">74 字 · 约 4 行</div>
+            </div>
+            <ul class="issue-list">
+              <li class="bad">按钮「Aprovecha el 50% ahora」超出 168px，线上会被裁成省略号。</li>
+              <li class="warn">字幕约 4 行，超过上限 3 行，可能挡住商品卡。</li>
+            </ul>
+            <div class="culture-card">
+              <div class="culture-label">文化适配</div>
+              <p>西语比英文长 20–30%，按钮最容易截断。拉美直播爱热情，但要避开过于侵略的命令式，且注意地区用词。</p>
+            </div>
+          </div>
+          <figcaption>QA 输出：像素校验结论与文化适配提示直接标在文案旁边，发布前一眼扫过就能决定这条能不能发。</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- 04 技术说明 -->
+    <section class="case-section">
+      <div class="case-num">04</div>
+      <h2>技术说明</h2>
+      <ul class="tech-list">
+        <li><strong>意图分类</strong>：多语言正则 <code>classify()</code>，识别促销、进房、送礼、关注四类意图，未命中回退通用文案。</li>
+        <li><strong>文案数据</strong>：75 组文案包（5 语言 × 3 语气 × 5 意图类别），字幕与 CTA 成对维护，保证语气一致。</li>
+        <li><strong>像素测量</strong>：离屏 DOM <code>estimateLines()</code> / <code>ctaOverflows()</code>，与线上同字体同字号实测，而非估算。</li>
+        <li><strong>交互性能</strong>：180ms 输入防抖、事件委托、单次渲染批量更新五市场。</li>
+        <li><strong>响应式</strong>：980 / 720 双断点，市场卡 5 → 2 → 1 列降级。</li>
+        <li><strong>可访问性</strong>：<code>aria-label</code>、<code>focus-visible</code> 焦点环、<code>prefers-reduced-motion</code> 动效降级。</li>
+        <li><strong>架构预留</strong>：本地规则引擎接口化，未来可无缝替换为 LLM 生成。</li>
+      </ul>
+    </section>
+
+    <!-- 署名 -->
+    <section class="author-card">
+      <span class="avatar author-avatar" aria-hidden="true">青</span>
+      <div class="author-info">
+        <h2>Qingyu Peng</h2>
+        <p>信息学研究生 · 关注 UX 与产品方向<br/>这个项目从问题定义、交互设计到前端实现全部独立完成。</p>
+        <div class="author-links">
+          <!-- TODO: 替换为真实联系方式（邮箱 mailto:、GitHub、LinkedIn 链接） -->
+          <a class="author-link" href="#">邮箱</a>
+          <a class="author-link" href="#">GitHub</a>
+          <a class="author-link" href="#">LinkedIn</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p class="footer-brand">LiveCopy · 直播文案工作室</p>
+      <nav class="footer-nav">
+        <a href="index.html">首页</a>
+        <a href="tool.html">工具</a>
+        <a href="about.html">关于</a>
+      </nav>
+      <p class="footer-meta">Designed &amp; built by Qingyu Peng · © 2026 · 纯前端实现，双击即可本地运行</p>
+    </div>
+  </footer>
+
+  <script src="site.js"></script>
+</body>
+</html>
