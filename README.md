@@ -2,7 +2,7 @@
 
 > 一句英文直播意图，五个市场的直播文案同时就绪——附像素级 QA 校验与文化适配提示。
 
-**在线访问**：本仓库开启 GitHub Pages 后自动生成（`你的用户名.github.io/livecopy-studio`）
+**在线访问**：https://rainiepeng0408-arch.github.io/livecopy-studio/
 
 ## 这是什么
 
