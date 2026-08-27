@@ -41,7 +41,7 @@ python3 -m http.server 8000
 - 文案数据：75 组文案包（5 语言 × 3 语气 × 5 意图）
 - 像素测量：离屏 DOM `estimateLines()` / `ctaOverflows()` 实测按钮宽度与字幕行数
 - 响应式 980 / 720 双断点；`aria-label`、`focus-visible`、`prefers-reduced-motion` 可访问性支持
-- 本地规则引擎接口化设计，未来可无缝替换为 LLM 生成
+- **AI 双引擎**：规则引擎离线兜底 + OpenAI 兼容大模型现场生成（智谱 GLM / DeepSeek / Kimi / 千问 / OpenAI / 自定义）。用户自填 API Key，仅存本机 localStorage，浏览器直连供应商；AI 生成的文案同样要过像素校验，按钮溢出照样亮红标
 
 ## 作者
 

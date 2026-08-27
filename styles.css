@@ -570,6 +570,124 @@ textarea:focus,
   width: 202px;
 }
 
+/* ============================================================
+   双引擎面板（规则 / AI）
+   ============================================================ */
+
+.engine-panel {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff9f6;
+}
+
+.engine-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.engine-pill {
+  background: #fff;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  padding: 7px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+}
+
+.engine-pill.active {
+  background: #ede7fb;
+  border-color: transparent;
+  color: #5b4a9e;
+  font-weight: 700;
+}
+
+.ai-settings {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.ai-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ai-row label {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.ai-row select,
+.ai-row input {
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+}
+
+.ai-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.ai-generate-btn {
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: #7c5cd6;
+  border: none;
+  color: #fff;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.ai-generate-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(124, 92, 214, 0.3);
+}
+
+.ai-generate-btn:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.ai-status {
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.badge.ai {
+  background: #ede7fb;
+  color: #5b4a9e;
+}
+
+.meta-title .ai-mark { color: #7c5cd6; }
+
+@media (max-width: 720px) {
+  .ai-row { grid-template-columns: 1fr; }
+}
+
 .measure-caption {
   color: #000;
   text-shadow: none;

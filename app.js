@@ -273,7 +273,7 @@ function renderFocus(pack) {
   document.getElementById('username').textContent = locale.username;
   document.getElementById('musicRow').textContent = locale.music;
   document.getElementById('shareLabel').textContent = locale.share;
-  document.getElementById('focusMarket').textContent = locale.label;
+  document.getElementById('focusMarket').textContent = locale.label + (pack.ai ? ' · ✨ AI 生成' : '');
   translatedTextEl.textContent = pack.caption;
   ctaButton.textContent = pack.cta;
   ctaButton.classList.toggle('is-overflow', pack.qa.buttonOverflow);
@@ -293,13 +293,14 @@ function renderGrid(packs) {
       : pack.qa.lines > Number(captionLimitInput.value)
         ? '<span class="badge warn">字幕过长</span>'
         : '<span class="badge ok">可上</span>';
+    const aiBadge = pack.ai ? '<span class="badge ai">✨ AI</span>' : '';
     const active = pack.id === currentLang ? ' active' : '';
     const risk = pack.qa.buttonOverflow ? ' risk' : '';
     return `
       <button class="market-card${active}${risk}" data-lang="${pack.id}" type="button">
         <div class="market-top">
           <span class="market-name">${locale.short}</span>
-          <span class="badges">${badge}</span>
+          <span class="badges">${aiBadge}${badge}</span>
         </div>
         <p class="mini-caption">${pack.caption}</p>
         <span class="mini-cta">${pack.cta}</span>
@@ -316,6 +317,20 @@ function updatePreview() {
     const qa = qaFor(copy, source);
     return { id: locale.id, ...copy, qa };
   });
+
+  /* AI 引擎开启时：用当前语气的缓存结果覆盖规则引擎产出（来源一致才生效） */
+  if (AI.engine === 'ai') {
+    const cached = AI.results.get(currentTone);
+    if (cached && cached.source === (source || 'Come hang in the live.')) {
+      lastPacks = lastPacks.map((p) => {
+        const aiPack = cached.byLocale[p.id];
+        return aiPack ? { ...p, ...aiPack, qa: qaFor(aiPack, source) } : p;
+      });
+    } else if (!AI.running && typeof aiStatus !== 'undefined') {
+      aiStatus.textContent = '当前意图/语气还没有 AI 结果，点「✨ AI 生成」用大模型重写五个市场。';
+    }
+  }
+
   const focus = lastPacks.find((p) => p.id === currentLang);
   renderFocus(focus);
   renderGrid(lastPacks);
@@ -374,5 +389,166 @@ document.getElementById('commentBtn').addEventListener('click', () => {
   locale.comments.push(locale.comments.shift());
   renderComments(locale);
 });
+
+/* ============================================================
+   AI 双引擎：规则引擎离线兜底 + OpenAI 兼容大模型现场生成
+   密钥只存本机 localStorage，请求直连所选供应商
+   ============================================================ */
+
+const AI_PROVIDERS = {
+  glm: { label: '智谱 GLM', baseURL: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-4-flash' },
+  deepseek: { label: 'DeepSeek', baseURL: 'https://api.deepseek.com', model: 'deepseek-chat' },
+  kimi: { label: '月之暗面 Kimi', baseURL: 'https://api.moonshot.cn/v1', model: 'moonshot-v1-8k' },
+  qwen: { label: '通义千问', baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1', model: 'qwen-plus' },
+  openai: { label: 'OpenAI', baseURL: 'https://api.openai.com/v1', model: 'gpt-4o-mini' },
+  custom: { label: '自定义', baseURL: '', model: '' }
+};
+
+const TONE_PROMPTS = {
+  promo: '热闹促销：折扣感和紧迫感强，节奏快',
+  gentle: '温柔陪伴：少催促、少感叹号，像朋友间的温和邀请',
+  shop: '清晰导购：先说动作再说利益，像耐心的商品导购'
+};
+
+const AI = { engine: 'rules', results: new Map(), running: false };
+
+const aiSettings = document.getElementById('aiSettings');
+const aiProvider = document.getElementById('aiProvider');
+const aiKey = document.getElementById('aiKey');
+const aiModel = document.getElementById('aiModel');
+const aiBase = document.getElementById('aiBase');
+const aiBaseRow = document.getElementById('aiBaseRow');
+const aiGenerate = document.getElementById('aiGenerate');
+const aiStatus = document.getElementById('aiStatus');
+
+function loadAIPrefs() {
+  const saved = localStorage.getItem('livecopy_ai_provider');
+  aiProvider.value = AI_PROVIDERS[saved] ? saved : 'glm';
+  aiKey.value = localStorage.getItem('livecopy_ai_key') || '';
+  applyProviderDefaults();
+}
+
+function applyProviderDefaults() {
+  const cfg = AI_PROVIDERS[aiProvider.value];
+  aiModel.value = cfg.model;
+  aiBase.value = cfg.baseURL;
+  aiBaseRow.hidden = aiProvider.value !== 'custom';
+}
+
+function saveAIPrefs() {
+  localStorage.setItem('livecopy_ai_provider', aiProvider.value);
+  localStorage.setItem('livecopy_ai_key', aiKey.value.trim());
+  localStorage.setItem('livecopy_ai_model', aiModel.value.trim());
+  localStorage.setItem('livecopy_ai_base', aiBase.value.trim());
+}
+
+async function callLLM(source, locale, tone) {
+  const cfg = AI_PROVIDERS[aiProvider.value];
+  const baseURL = (aiProvider.value === 'custom' ? aiBase.value.trim() : cfg.baseURL).replace(/\/+$/, '');
+  const key = aiKey.value.trim();
+  const model = aiModel.value.trim() || cfg.model;
+  if (!baseURL || !key) throw new Error('缺少 Base URL 或 API Key');
+
+  const system = '你是 TikTok 直播电商的资深本地化文案专家，为不同市场重写直播文案：不逐词翻译，按当地口语习惯重新创作。只输出一个 JSON 对象，格式 {"caption":"...","cta":"..."}，不要输出解释、markdown 或任何多余内容。';
+  const user = `英文直播意图：${source}
+目标市场：${locale.label}（必须使用该市场的语言撰写）
+语气：${TONE_PROMPTS[tone]}
+文化要求（务必遵守）：${locale.culture}
+硬性约束：caption 是直播画面底部字幕，控制在 25 个字/词以内；cta 是红色按钮上的文字，不超过 4 个字/词，短促有力。
+现在输出 JSON。`;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 30000);
+  let res;
+  try {
+    res = await fetch(baseURL + '/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: 'system', content: system },
+          { role: 'user', content: user }
+        ],
+        temperature: 0.8
+      }),
+      signal: controller.signal
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const data = await res.json();
+  const text = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
+  const match = text.match(/\{[\s\S]*?\}/);
+  if (!match) throw new Error('未返回 JSON');
+  const parsed = JSON.parse(match[0]);
+  const caption = String(parsed.caption || '').trim();
+  const cta = String(parsed.cta || '').trim();
+  if (!caption || !cta) throw new Error('JSON 内容为空');
+  return { caption, cta };
+}
+
+async function aiGenerateAll() {
+  if (AI.running) return;
+  if (!aiKey.value.trim()) {
+    aiStatus.textContent = '请先填写 API Key（在上方选择供应商后填入）';
+    return;
+  }
+  const source = sourceText.value.trim() || 'Come hang in the live.';
+  AI.running = true;
+  aiGenerate.disabled = true;
+  aiStatus.textContent = 'AI 正在为五个市场撰写文案，约需 5–20 秒…';
+
+  const tone = currentTone;
+  const results = await Promise.all(LOCALES.map(async (locale) => {
+    try {
+      const pack = await callLLM(source, locale, tone);
+      return { id: locale.id, caption: pack.caption, cta: pack.cta, ai: true };
+    } catch (err) {
+      return { id: locale.id, error: err.message };
+    }
+  }));
+
+  const byLocale = {};
+  let ok = 0;
+  results.forEach((r) => { if (r.caption) { byLocale[r.id] = r; ok += 1; } });
+
+  if (!ok) {
+    const firstErr = (results.find((r) => r.error) || {}).error || '未知错误';
+    aiStatus.textContent = `五个市场全部失败（原因：${firstErr}）。请检查 Key 是否完整、账户是否可用。已保持规则引擎结果。`;
+    AI.running = false;
+    aiGenerate.disabled = false;
+    return;
+  }
+
+  AI.results.set(tone, { byLocale, source });
+  updatePreview();
+  const failed = LOCALES.length - ok;
+  aiStatus.textContent = failed
+    ? `生成完成：${ok} 个市场来自 AI，${failed} 个失败市场已回退规则引擎。`
+    : '生成完成 ✨ AI 文案同样要过像素校验——红黄标照样会亮。';
+  AI.running = false;
+  aiGenerate.disabled = false;
+}
+
+document.querySelectorAll('.engine-pill').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelector('.engine-pill.active').classList.remove('active');
+    btn.classList.add('active');
+    AI.engine = btn.dataset.engine;
+    aiSettings.hidden = AI.engine !== 'ai';
+    updatePreview();
+  });
+});
+
+aiProvider.addEventListener('change', () => {
+  applyProviderDefaults();
+  saveAIPrefs();
+});
+[aiKey, aiModel, aiBase].forEach((input) => input.addEventListener('change', saveAIPrefs));
+aiGenerate.addEventListener('click', aiGenerateAll);
+
+loadAIPrefs();
 
 updatePreview();

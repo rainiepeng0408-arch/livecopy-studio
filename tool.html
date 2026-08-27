@@ -63,6 +63,44 @@
         </div>
       </div>
       <p class="tone-hint" id="toneHint">热闹促销：折扣感和紧迫感更强，西语按钮最容易被撑破。</p>
+
+      <div class="engine-panel">
+        <div class="engine-toggle" role="group" aria-label="生成引擎">
+          <span class="engine-label">生成引擎：</span>
+          <button class="engine-pill active" data-engine="rules" type="button">⚙️ 规则引擎（离线）</button>
+          <button class="engine-pill" data-engine="ai" type="button">✨ AI 生成（大模型）</button>
+        </div>
+
+        <div class="ai-settings" id="aiSettings" hidden>
+          <div class="ai-row">
+            <label>供应商
+              <select id="aiProvider">
+                <option value="glm">智谱 GLM（有免费模型）</option>
+                <option value="deepseek">DeepSeek</option>
+                <option value="kimi">月之暗面 Kimi</option>
+                <option value="qwen">通义千问</option>
+                <option value="openai">OpenAI</option>
+                <option value="custom">自定义（OpenAI 兼容）</option>
+              </select>
+            </label>
+            <label>API Key
+              <input id="aiKey" type="password" placeholder="sk-..." autocomplete="off" />
+            </label>
+            <label>模型
+              <input id="aiModel" type="text" autocomplete="off" />
+            </label>
+          </div>
+          <div class="ai-row" id="aiBaseRow" hidden>
+            <label>Base URL（OpenAI 兼容地址）
+              <input id="aiBase" type="text" placeholder="https://.../v1" autocomplete="off" />
+            </label>
+          </div>
+          <div class="ai-actions">
+            <button class="ai-generate-btn" id="aiGenerate" type="button">✨ AI 生成五市场文案</button>
+            <span class="ai-status" id="aiStatus">Key 只保存在本机浏览器（localStorage），请求直连供应商，不上传任何服务器。</span>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section class="preview">
@@ -153,7 +191,7 @@
     </section>
 
     <footer class="note">
-      文案适配目前用本地规则引擎（可替换成大模型）：先判意图，再按市场语气生成，而不是逐词翻译。校验看的是真实像素宽度和预估行数，不是只数字符。
+      双引擎设计：默认规则引擎离线运行——先判意图，再按市场语气重新写，而不是逐词翻译；开启 AI 生成后由大模型现场撰写，规则引擎自动兜底。无论哪个引擎产出，校验都看真实像素宽度与行数——AI 写的西语按钮超宽，红标照样亮。
     </footer>
   </main>
 
